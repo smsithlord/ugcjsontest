@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure UGC JSON Encode/Decode Demo - by SM Sith Lord</title>
+    <meta property="og:title" content="Secure UGC JSON Encode/Decode Demo - by SM Sith Lord">
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="Learn & more importantly TEST an approach to securely inject UGC JSON data into web pages.">
+    <meta property="og:image" content="https://smsithlord.com/meta_image.jpg">
+    <meta property="og:url" content="https://smsithlord.com/ugcjsontest">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://smsithlord.com/meta_image.jpg"/>
+    <meta name="twitter:title" content="Secure UGC JSON Encode/Decode Demo - by SM Sith Lord"/>
+    <meta name="twitter:description" content="Learn & more importantly TEST an approach to securely inject UGC JSON data into web pages."/>
+    <meta content="@anarchyarcade" name="twitter:site"/>
+    <link rel="icon" type="image/x-icon" href="https://smsithlord.com/favicon.ico" />
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --primary-color: #4a90e2;
+            --secondary-color: #f39c12;
+            --border-color: #ddd;
+            --scrollbar-thumb: #aaa;
+            --scrollbar-thumb-hover: #888;
+            --scrollbar-track: #ddd;
+            --scrollbar-track-hover: #ccc;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --primary-color: #90caf9;
+            --secondary-color: #f4d03f;
+            --border-color: #333;
+            --scrollbar-thumb: #555;
+            --scrollbar-thumb-hover: #777;
+            --scrollbar-track: #333;
+            --scrollbar-track-hover: #444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            padding: 10vw;
+            padding-top:  4vh;
+            padding-bottom:  10vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+        }
+
+        .step {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .step.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        pre {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+        }
+
+        #faq details {
+            margin-bottom: 10px;
+        }
+
+        #faq summary {
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+
+        #restart-btn {
+            display: block;
+            margin: 20px auto;
+        }
+
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--scrollbar-thumb-hover);
+        }
+        ::-webkit-scrollbar-track {
+            background-color: var(--scrollbar-track);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track:hover {
+            background-color: var(--scrollbar-track-hover);
+        }
+        #submission-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #submission-message:not(.visible) {
+            display:  none;
+        }
+
+        .checkmark {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px #7ac142;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #7ac142;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 30px #7ac142;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Secure JSON Encode/Decode Demo</h1>
+        <button id="theme-toggle">Toggle Theme</button>
+    </header>
+
+    <main>
+        <section id="demo-container">
+            <div id="step-1" class="step">
+                <h2>Step 1: Input User Data</h2>
+                <form id="user-form">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" placeholder="Jason Voorhees">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" name="age" placeholder="13">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" placeholder="Jason Voorhees is the main antagonist of the Friday the 13th film series. He is a seemingly immortal, superhuman serial killer who haunts Camp Crystal Lake. Jason is known for his iconic hockey mask and machete, and his relentless pursuit of camp counselors and other victims."></textarea>
+                    </div>
+                    <button type="submit">Submit</button>
+                </form>
+                <div id="submission-message">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                    <p>Demo User Data Submitted</p>
+                    <p>Scroll down to check your results!</p>
+                </div>
+            </div>
+
+            <div id="step-2" class="step hidden">
+                <h2>Step 2: Create JSON Object</h2>
+                <pre id="json-object"></pre>
+                <button class="copy-btn" data-target="json-object">Copy</button>
+                <button id="console-btn">Output To Console As Object</button>
+            </div>
+
+            <div id="step-3" class="step hidden">
+                <h2>Step 3: Encode JSON String</h2>
+                <pre id="encoded-string"></pre>
+                <button class="copy-btn" data-target="encoded-string">Copy</button>
+            </div>
+
+            <div id="step-4" class="step hidden">
+                <h2>Step 4: Insert into Template</h2>
+                <p><strong>Note:</strong> Double quotes are sufficient to securely enclose a URI-component-encoded literal.</p>
+                <pre id="template-code"></pre>
+                <button class="copy-btn" data-target="template-code">Copy</button>
+            </div>
+
+            <div id="step-5" class="step hidden">
+                <h2>Step 5: Result</h2>
+                <h3>iframe Output Test</h3>
+                <iframe id="result-frame"></iframe>
+                <p>The iframe example was generated with the following template:</p>
+                <pre id="template-original"></pre>
+            </div>
+        </section>
+
+        <section id="explanation">
+            <h2>How It Works</h2>
+            <p>This demo shows a secure method for <b>injecting</b> UGC data as JSON while servering pages by using URI-component encoding/decoding.</p>
+            <p>By encoding the JSON data of a valid object & injecting it into the page, we prevent potential injection attacks and ensure that the data is treated as a string literal when inserted into HTML or JavaScript contexts.</p>
+            <p>This approach avoids the need for runtime database calls to fetch the UGC and allows the page to function more like static HTML.</p>
+        </section>
+
+        <section id="faq">
+            <h2>FAQ</h2>
+            <details>
+                <summary>Why is this method secure?</summary>
+                <p>This method prevents injection attacks by encoding special characters and ensuring that the data is treated as a string literal.</p>
+            </details>
+            <details>
+                <summary>Can this method be used with other programming languages?</summary>
+                <p>Yes, most programming languages have equivalent functions for URI encoding and JSON manipulation. Here are examples in Node.js and PHP:</p>
+                <h4>Node.js</h4>
+                <pre><code>
+        const data = { name: "John Doe", age: 30, description: "Some description" };
+        const jsonString = JSON.stringify(data);
+        const encodedData = encodeURIComponent(jsonString);
+        console.log(encodedData);
+                </code></pre>
+                <p>Node.js uses the same <code>JSON.stringify()</code> and <code>encodeURIComponent()</code> functions as browser JavaScript.</p>
+                <h4>PHP</h4>
+                <pre><code>
+        $data = array("name" => "John Doe", "age" => 30, "description" => "Some description");
+        $jsonString = json_encode($data);
+        $encodedData = urlencode($jsonString);
+        echo $encodedData;
+                </code></pre>
+                <p>In PHP, <code>json_encode()</code> is equivalent to <code>JSON.stringify()</code>, and <code>urlencode()</code> is equivalent to <code>encodeURIComponent()</code>.</p>
+            </details>
+            <details>
+                <summary>How about sanitizing strings for literal injection as meta tag attribute values or HTML page titles?</summary>
+                <p>When dealing with user-generated content (UGC) that needs to be inserted into meta tag attributes or HTML page titles, it's crucial to sanitize the input to prevent potential XSS attacks or HTML injection. Here are simple solutions for Node.js and PHP:</p>
+                <h4>Node.js</h4>
+                <pre><code>
+        function sanitizeForHTMLAttribute(ugcValue) {
+            return ugcValue
+                .replace(/[^\p{L}\p{N}\s.,!?()-]/gu, '') // Remove special characters
+                .replace(/\s+/g, ' ')                    // Replace multiple spaces with a single space
+                .trim()
+                .slice(0, 1024);                          // Truncate to 1024 characters
+        }
+
+        // Usage:
+        const ugcTitle = document.getElementById('name').value;
+        const ugcDescription = document.getElementById('description').value;
+        const sanitizedTitle = sanitizeForHTMLAttribute(ugcTitle);
+        const sanitizedDescription = sanitizeForHTMLAttribute(ugcDescription);
+
+        // Output:
+        console.log('Sanitized Title:', sanitizedTitle);
+        console.log('Sanitized Description:', sanitizedDescription);
+                </code></pre>
+                <div id="nodejs-example">
+                    <h5>Example Output:</h5>
+                    <pre><code id="nodejs-output"></code></pre>
+                </div>
+                <h4>PHP</h4>
+                <pre><code>
+        function sanitizeForHTMLAttribute($ugcValue) {
+            // Remove all characters except alphanumeric, spaces, and basic punctuation
+            $sanitized = preg_replace('/[^\p{L}\p{N}\s.,!?()-]/u', '', $ugcValue);
+            $sanitized = preg_replace('/\s+/', ' ', $sanitized); // Replace multiple spaces with a single space
+            $sanitized = trim($sanitized);
+            return mb_substr($sanitized, 0, 1024); // Truncate to 1024 characters, considering multibyte characters
+        }
+
+        // Usage:
+        $ugcTitle = 'User\'s "Awesome" &lt;Script&gt; Title with some extra text to demonstrate truncation';
+        $sanitizedTitle = sanitizeForHTMLAttribute($ugcTitle);
+        echo $sanitizedTitle;
+        // Output: Users Awesome Script Title with some extra text to demonstrate truncation
+                </code></pre>
+                <p>These functions sanitize the input by:</p>
+                <ul>
+                    <li>Removing all special characters except for alphanumeric, spaces, and basic punctuation</li>
+                    <li>Replacing multiple spaces with a single space</li>
+                    <li>Trimming leading and trailing whitespace</li>
+                    <li>Truncating the result to a maximum of 1024 characters</li>
+                </ul>
+                <p>After sanitization, the resulting string can be safely used as a literal replacement in meta tag attributes or HTML page titles. However, always be cautious when handling user-generated content and consider using well-tested libraries or frameworks for more comprehensive security measures. Test thoroughly in your deployment environment.</p>
+            </details>
+        </section>
+    </main>
+
+    <button id="restart-btn">Restart Test</button>
+
+    <textarea id="testPageIframeContentCode" style="display: none;">
+<html>
+<head>
+    <title>Secure Data Injection Test</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            color: #333;
+            padding: 20px;
+        }
+        textarea {
+            flex-grow:  2;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border:  none;
+            background:  none;
+        }
+    </style>
+    <script>
+        const userDataEncodedString = "REPLACE_ME_WITH_ENCODED_USER_DATA_STRING_LITERAL";
+    </script>
+</head>
+<body>
+    <h1>User Data:</h1>
+    <script>
+        const userData = JSON.parse(decodeURIComponent(userDataEncodedString));
+        for (let key in userData) {
+            const container = document.createElement('div');
+            container.style.cssText = "display: flex; flex-direction: rows; padding: 8px; border-radius: 8px; margin: 8px; background-color: #fff; border: 1px solid #ddd;";
+            const keyElem = document.createElement('div');
+            keyElem.textContent = `${key}:`;//${userData[key]}`;
+            container.appendChild(keyElem);
+            const inputElem = document.createElement('textarea');
+            inputElem.value = userData[key];
+            container.appendChild(inputElem);
+            document.body.appendChild(container);
+        }
+    </script>
+</body>
+</html>
+    </textarea>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            const userForm = document.getElementById('user-form');
+            const steps = document.querySelectorAll('.step');
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            const consoleBtn = document.getElementById('console-btn');
+            const restartBtn = document.getElementById('restart-btn');
+
+            themeToggle.addEventListener('click', toggleTheme);
+            userForm.addEventListener('submit', handleFormSubmit);
+            copyButtons.forEach(btn => btn.addEventListener('click', copyToClipboard));
+            consoleBtn.addEventListener('click', outputToConsole);
+            restartBtn.addEventListener('click', restartTest);
+
+            function toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+            }
+
+            function handleFormSubmit(e) {
+                e.preventDefault();
+                const formData = new FormData(userForm);
+                const userData = Object.fromEntries(formData.entries());
+                
+                // Use placeholder values for missing form values
+                if (!userData.name) userData.name = "Jason Voorhees";
+                if (!userData.age) userData.age = "13";
+                if (!userData.description) userData.description = "Jason Voorhees is the main antagonist of the Friday the 13th film series. He is a seemingly immortal, superhuman serial killer who haunts Camp Crystal Lake. Jason is known for his iconic hockey mask and machete, and his relentless pursuit of camp counselors and other victims.";
+
+                // Hide the form and show the submission message
+                userForm.style.display = 'none';
+                const submissionMessage = document.getElementById('submission-message');
+                submissionMessage.classList.add('visible');
+                submissionMessage.offsetWidth;
+                submissionMessage.style.opacity = '1';
+
+                showStep(1);
+                displayJsonObject(userData);
+                encodeAndDisplayJson(userData);
+                insertIntoTemplateAndDisplay(userData);
+                updateNodeJSExample();
+            }
+
+            function showStep(stepNumber) {
+                steps.forEach((step, index) => {
+                    if (index < stepNumber) {
+                        step.classList.remove('hidden');
+                    } else {
+                        step.classList.add('hidden');
+                    }
+                });
+            }
+
+            function displayJsonObject(data) {
+                const jsonPre = document.getElementById('json-object');
+                jsonPre.jsonObject = data;
+                jsonPre.textContent = JSON.stringify(data, null, 2);
+                showStep(2);
+            }
+
+            function encodeAndDisplayJson(data) {
+                const encodedString = encodeURIComponent(JSON.stringify(data));
+                const encodedPre = document.getElementById('encoded-string');
+                encodedPre.textContent = encodedString;
+                showStep(3);
+            }
+
+            function insertIntoTemplateAndDisplay(data) {
+                const encodedData = encodeURIComponent(JSON.stringify(data));
+                const template = document.getElementById('testPageIframeContentCode').value;
+                const iframeContent = template.replace('REPLACE_ME_WITH_ENCODED_USER_DATA_STRING_LITERAL', encodedData);
+                
+                const templatePre = document.getElementById('template-code');
+                templatePre.textContent = iframeContent;
+                showStep(4);
+
+                const iframe = document.getElementById('result-frame');
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                doc.open();
+                doc.write(iframeContent);
+                doc.close();
+
+                const templateOriginal = document.getElementById('template-original');
+                templateOriginal.textContent = template;
+
+                showStep(5);
+            }
+
+            function copyToClipboard(e) {
+                const targetId = e.target.dataset.target;
+                const textToCopy = document.getElementById(targetId).textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    e.target.textContent = 'Copied!';
+                    setTimeout(() => {
+                        e.target.textContent = 'Copy';
+                    }, 2000);
+                });
+            }
+
+            function outputToConsole() {
+                const jsonObject = document.getElementById('json-object').jsonObject;
+                console.log(jsonObject);
+                consoleBtn.textContent = 'Check your console!';
+                setTimeout(() => {
+                    consoleBtn.textContent = 'Output To Console As Object';
+                }, 2000);
+            }
+
+            function restartTest() {
+                window.scrollTo(0, 0);
+                document.location.reload();
+            }
+
+            // Add this to the existing event listener
+            const faqDetails = document.querySelectorAll('#faq details');
+            faqDetails.forEach(detail => {
+                detail.addEventListener('toggle', handleFAQToggle);
+            });
+
+            function handleFAQToggle(e) {
+                if (e.target.open) {
+                    updateNodeJSExample();
+                }
+            }
+
+            function updateNodeJSExample() {
+                const nameInput = document.getElementById('name');
+                const ageInput = document.getElementById('age');
+                const descriptionInput = document.getElementById('description');
+                const outputElement = document.getElementById('nodejs-output');
+
+                function sanitizeForHTMLAttribute(ugcValue) {
+                    return ugcValue
+                        .replace(/[^\p{L}\p{N}\s.,!?()-]/gu, '') // Remove special characters
+                        .replace(/\s+/g, ' ')                    // Replace multiple spaces with a single space
+                        .trim()
+                        .slice(0, 1024);                          // Truncate to 1024 characters
+                }
+
+                const sanitizedName = sanitizeForHTMLAttribute(nameInput.value || nameInput.placeholder);
+                const sanitizedAge = sanitizeForHTMLAttribute(ageInput.value || ageInput.placeholder);
+                const sanitizedDescription = sanitizeForHTMLAttribute(descriptionInput.value || descriptionInput.placeholder);
+
+                outputElement.textContent = `Sanitized Title: ${sanitizedName}\nSanitized Age: ${sanitizedAge}\nSanitized Description: ${sanitizedDescription}`;
+            }
+        });
+    </script>
+
+    <footer id="page-footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://x.com/anarchyarcade" target="_blank" rel="noopener noreferrer" class="footer-link x-link">
+                    <span>Created by SM Sith Lord</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </a>
+                <a href="https://github.com/smsithlord/ugcjsontest" target="_blank" rel="noopener noreferrer" class="footer-link github-link">
+                    <span>View on GitHub</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+            </div>
+            <p>Demo page assistance provided by Claude, an AI assistant.</p>
+            <p>2023 | Educational purposes only. | No rights reserved.</p>
+        </div>
+    </footer>
+
+    <style>
+        #page-footer {
+            background-color: var(--bg-color);
+            border-top: 1px solid var(--border-color);
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+        #page-footer .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #page-footer p {
+            margin: 5px 0;
+        }
+        #page-footer p:last-child {
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .footer-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+        .footer-link svg {
+            width: 16px;
+            height: 16px;
+            margin-left: 5px;
+        }
+        .footer-link span {
+            font-weight: bold;
+        }
+    </style>
+
+</body>
+</html>
