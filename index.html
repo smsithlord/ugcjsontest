@@ -308,79 +308,77 @@
                 <summary>Why is this method secure?</summary>
                 <p>This method prevents injection attacks by encoding special characters and ensuring that the data is treated as a string literal.</p>
             </details>
-            <details>
-                <summary>Can this method be used with other programming languages?</summary>
-                <p>Yes, most programming languages have equivalent functions for URI encoding and JSON manipulation. Here are examples in Node.js and PHP:</p>
-                <h4>Node.js</h4>
-                <pre><code>
-        const data = { name: "John Doe", age: 30, description: "Some description" };
-        const jsonString = JSON.stringify(data);
-        const encodedData = encodeURIComponent(jsonString);
-        console.log(encodedData);
-                </code></pre>
-                <p>Node.js uses the same <code>JSON.stringify()</code> and <code>encodeURIComponent()</code> functions as browser JavaScript.</p>
-                <h4>PHP</h4>
-                <pre><code>
-        $data = array("name" => "John Doe", "age" => 30, "description" => "Some description");
-        $jsonString = json_encode($data);
-        $encodedData = urlencode($jsonString);
-        echo $encodedData;
-                </code></pre>
-                <p>In PHP, <code>json_encode()</code> is equivalent to <code>JSON.stringify()</code>, and <code>urlencode()</code> is equivalent to <code>encodeURIComponent()</code>.</p>
-            </details>
-            <details>
-                <summary>How about sanitizing strings for literal injection as meta tag attribute values or HTML page titles?</summary>
-                <p>When dealing with user-generated content (UGC) that needs to be inserted into meta tag attributes or HTML page titles, it's crucial to sanitize the input to prevent potential XSS attacks or HTML injection. Here are simple solutions for Node.js and PHP:</p>
-                <h4>Node.js</h4>
-                <pre><code>
-        function sanitizeForHTMLAttribute(ugcValue) {
-            return ugcValue
-                .replace(/[^\p{L}\p{N}\s.,!?()-]/gu, '') // Remove special characters
-                .replace(/\s+/g, ' ')                    // Replace multiple spaces with a single space
-                .trim()
-                .slice(0, 1024);                          // Truncate to 1024 characters
-        }
+    <details>
+        <summary>Can this method be used with other programming languages?</summary>
+        <p>Yes, most programming languages have equivalent functions for URI encoding and JSON manipulation. Here are examples in Node.js and PHP:</p>
+        <h4>Node.js</h4>
+        <pre><code>
+const data = { name: "John Doe", age: 30, description: "Some description" };
+const jsonString = JSON.stringify(data);
+const encodedData = encodeURIComponent(jsonString);
+console.log(encodedData);
+        </code></pre>
+        <p>Node.js uses the same <code>JSON.stringify()</code> and <code>encodeURIComponent()</code> functions as browser JavaScript.</p>
+        <h4>PHP</h4>
+        <pre><code>
+$data = array("name" => "John Doe", "age" => 30, "description" => "Some description");
+$jsonString = json_encode($data);
+$encodedData = urlencode($jsonString);
+echo $encodedData;
+        </code></pre>
+        <p>In PHP, <code>json_encode()</code> is equivalent to <code>JSON.stringify()</code>, and <code>urlencode()</code> is equivalent to <code>encodeURIComponent()</code>.</p>
+    </details>
+    <details>
+        <summary>How about sanitizing strings for literal injection as meta tag attribute values or HTML page titles?</summary>
+        <p>When dealing with user-generated content (UGC) that needs to be inserted into meta tag attributes or HTML page titles, it's crucial to sanitize the input to prevent potential XSS attacks or HTML injection. Here are simple solutions for Node.js and PHP:</p>
+        <h4>Node.js</h4>
+        <pre><code>function sanitizeForHTMLAttribute(ugcValue) {
+    return ugcValue
+        .replace(/[^\p{L}\p{N}\s.,!?()-]/gu, '') // Remove special characters
+        .replace(/\s+/g, ' ')                    // Replace multiple spaces with a single space
+        .trim()
+        .slice(0, 1024);                          // Truncate to 1024 characters
+}
 
-        // Usage:
-        const ugcTitle = document.getElementById('name').value;
-        const ugcDescription = document.getElementById('description').value;
-        const sanitizedTitle = sanitizeForHTMLAttribute(ugcTitle);
-        const sanitizedDescription = sanitizeForHTMLAttribute(ugcDescription);
+// Usage:
+const ugcTitle = document.getElementById('name').value;
+const ugcDescription = document.getElementById('description').value;
+const sanitizedTitle = sanitizeForHTMLAttribute(ugcTitle);
+const sanitizedDescription = sanitizeForHTMLAttribute(ugcDescription);
 
-        // Output:
-        console.log('Sanitized Title:', sanitizedTitle);
-        console.log('Sanitized Description:', sanitizedDescription);
-                </code></pre>
-                <div id="nodejs-example">
-                    <h5>Example Output:</h5>
-                    <pre><code id="nodejs-output"></code></pre>
-                </div>
-                <h4>PHP</h4>
-                <pre><code>
-        function sanitizeForHTMLAttribute($ugcValue) {
-            // Remove all characters except alphanumeric, spaces, and basic punctuation
-            $sanitized = preg_replace('/[^\p{L}\p{N}\s.,!?()-]/u', '', $ugcValue);
-            $sanitized = preg_replace('/\s+/', ' ', $sanitized); // Replace multiple spaces with a single space
-            $sanitized = trim($sanitized);
-            return mb_substr($sanitized, 0, 1024); // Truncate to 1024 characters, considering multibyte characters
-        }
+// Output:
+console.log('Sanitized Title:', sanitizedTitle);
+console.log('Sanitized Description:', sanitizedDescription);
+        </code></pre>
+        <div id="nodejs-example">
+            <h5>Example Output:</h5>
+            <pre><code id="nodejs-output"></code></pre>
+        </div>
+        <h4>PHP</h4>
+        <pre><code>function sanitizeForHTMLAttribute($ugcValue) {
+    // Remove all characters except alphanumeric, spaces, and basic punctuation
+    $sanitized = preg_replace('/[^\p{L}\p{N}\s.,!?()-]/u', '', $ugcValue);
+    $sanitized = preg_replace('/\s+/', ' ', $sanitized); // Replace multiple spaces with a single space
+    $sanitized = trim($sanitized);
+    return mb_substr($sanitized, 0, 1024); // Truncate to 1024 characters, considering multibyte characters
+}
 
-        // Usage:
-        $ugcTitle = 'User\'s "Awesome" &lt;Script&gt; Title with some extra text to demonstrate truncation';
-        $sanitizedTitle = sanitizeForHTMLAttribute($ugcTitle);
-        echo $sanitizedTitle;
-        // Output: Users Awesome Script Title with some extra text to demonstrate truncation
-                </code></pre>
-                <p>These functions sanitize the input by:</p>
-                <ul>
-                    <li>Removing all special characters except for alphanumeric, spaces, and basic punctuation</li>
-                    <li>Replacing multiple spaces with a single space</li>
-                    <li>Trimming leading and trailing whitespace</li>
-                    <li>Truncating the result to a maximum of 1024 characters</li>
-                </ul>
-                <p>After sanitization, the resulting string can be safely used as a literal replacement in meta tag attributes or HTML page titles. However, always be cautious when handling user-generated content and consider using well-tested libraries or frameworks for more comprehensive security measures. Test thoroughly in your deployment environment.</p>
-                <p>NOTE: The PHP approach shown here is <b>NOT</b> setup for testing on this page.  Be sure to test it somehow before relying on it.</p>
-            </details>
+// Usage:
+$ugcTitle = 'User\'s "Awesome" &lt;Script&gt; Title';
+$sanitizedTitle = sanitizeForHTMLAttribute($ugcTitle);
+echo $sanitizedTitle;
+// Output: Users Awesome Script Title
+        </code></pre>
+        <p>These functions sanitize the input by:</p>
+        <ul>
+            <li>Removing all special characters except for alphanumeric, spaces, and basic punctuation</li>
+            <li>Replacing multiple spaces with a single space</li>
+            <li>Trimming leading and trailing whitespace</li>
+            <li>Truncating the result to a maximum of 1024 characters</li>
+        </ul>
+        <p>After sanitization, the resulting string can be safely used as a literal replacement in meta tag attributes or HTML page titles. However, always be cautious when handling user-generated content and consider using well-tested libraries or frameworks for more comprehensive security measures. Test thoroughly in your deployment environment.</p>
+        <p>NOTE: The PHP approach shown here is <b>NOT</b> setup for testing on this page.  Be sure to test it somehow before relying on it.</p>
+    </details>
         </section>
     </main>
 
