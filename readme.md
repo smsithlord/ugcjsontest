@@ -9,7 +9,7 @@ Key features:
 - Live demo with step-by-step explanation
 
 ## Live Demo
-https://smsithlord.com/github.io/ugcjsontest
+https://smsithlord.github.io/ugcjsontest
 
 ## Development Process
 
