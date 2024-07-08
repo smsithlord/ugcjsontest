@@ -560,8 +560,8 @@ echo $sanitizedTitle;
 
                 function sanitizeForHTMLAttribute(ugcValue) {
                     return ugcValue
-                        .replace(/[^\p{L}\p{N}\s.,!?()-]/gu, '') // Remove special characters
-                        .replace(/\s+/g, ' ')                    // Replace multiple spaces with a single space
+                        .replace(/[^\p{L}\p{N}\s.,!?()/-]/gu, '') // Allow forward slashes
+                        .replace(/\s+/g, ' ')                     // Replace multiple spaces with a single space
                         .trim()
                         .slice(0, 1024);                          // Truncate to 1024 characters
                 }
